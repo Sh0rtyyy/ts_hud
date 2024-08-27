@@ -18,10 +18,10 @@ RegisterNetEvent('hud:server:GainStress', function(amount)
     local newStress
     if not player then return end
     if not resetStress then
-        if not Player.get('stress') then
-            Player.set('stress', 0)
+        if not player.get('stress') then
+            player.set('stress', 0)
         end
-        newStress = Player.get('stress') + amount
+        newStress = player.get('stress') + amount
         if newStress <= 0 then newStress = 0 end
     else
         newStress = 0
@@ -29,7 +29,7 @@ RegisterNetEvent('hud:server:GainStress', function(amount)
     if newStress > 100 then
         newStress = 100
     end
-    Player.set('stress', newStress)
+    player.set('stress', newStress)
     TriggerClientEvent('hud:client:UpdateStress', src, newStress)
     TriggerClientEvent('ox_lib:notify', src, {
         description = 'Feeling More Stressed!',
@@ -45,10 +45,10 @@ RegisterNetEvent('hud:server:RelieveStress', function(amount)
     local newStress
     if not player then return end
     if not resetStress then
-        if not Player.get('stress') then
-            Player.set('stress', 0)
+        if not player.get('stress') then
+            player.set('stress', 0)
         end
-        newStress = Player.get('stress') - amount
+        newStress = player.get('stress') - amount
         if newStress <= 0 then newStress = 0 end
     else
         newStress = 0
@@ -56,7 +56,7 @@ RegisterNetEvent('hud:server:RelieveStress', function(amount)
     if newStress > 100 then
         newStress = 100
     end
-    Player.set('stress', newStress)
+    player.set('stress', newStress)
     TriggerClientEvent('hud:client:UpdateStress', src, newStress)
     TriggerClientEvent('ox_lib:notify', src, {
         description = 'Feeling Less Stressed!',
