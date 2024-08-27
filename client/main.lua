@@ -1,4 +1,5 @@
 -- Last Modified: 25/08/2024
+ESX = exports["es_extended"]:getSharedObject()
 
 -- Global Constants and Configuration
 local Config = lib.load('config')
@@ -13,6 +14,23 @@ local currentColors = {
     health = '#51cf66', armor = '#74c0fc', oxygen = '#339af0',
     hunger = '#fcc419', thirst = '#22b8cf', stress = '#ff6b6b',
 }
+
+RegisterNetEvent("esx:playerLoaded", function()
+    Wait(2000)
+    startHUD()
+end)
+
+AddEventHandler('onResourceStart', function(resourceName)
+    if GetCurrentResourceName() ~= resourceName then return end
+    Wait(500)
+    startHUD()
+end)
+
+function startHUD()
+    TriggerEvent('hud:client:LoadMap')
+    TriggerEvent('ts_hud:client:showHud')
+    showingPlayerHUD = true
+end
 
 -- Utility Functions
 local function ShowNUI(action, shouldShow, focus)
@@ -321,7 +339,7 @@ end)
 if Config.stress.enableStress then
     CreateThread(function()
         while true do
-            if LocalPlayer.state.isLoggedIn and cache.vehicle then
+            if ESX.IsPlayerLoaded() and cache.vehicle then
                 local vehClass = GetVehicleClass(cache.vehicle)
                 local speed = GetEntitySpeed(cache.vehicle) * speedMultiplier
 
@@ -376,7 +394,7 @@ end)
 -- Fuel and Seatbelt Threads
 CreateThread(function()
     while true do
-        if LocalPlayer.state.isLoggedIn and cache.vehicle and not IsThisModelABicycle(GetEntityModel(cache.vehicle)) then
+        if ESX.IsPlayerLoaded() and cache.vehicle and not IsThisModelABicycle(GetEntityModel(cache.vehicle)) then
             if getFuelLevel(cache.vehicle) <= 20 and Config.isLowFuelChecked then
                 lib.notify({
                     description = 'Vehicle is low on fuel!',
@@ -412,9 +430,10 @@ CreateThread(function()
     end
 
     while true do
-        if not IsPauseMenuActive() and LocalPlayer.state.isLoggedIn then
+        if not IsPauseMenuActive() and ESX.IsPlayerLoaded() then
             local stamina = 100 - GetPlayerSprintStaminaRemaining(cache.playerId)
-            local PlayerData = Config.core.Functions.GetPlayerData()
+            TriggerEvent('esx_status:getStatus', 'hunger', function(status) hunger = status.getPercent() end)
+            TriggerEvent('esx_status:getStatus', 'thirst', function(status) thirst = status.getPercent() end)
 
             if not showingPlayerHUD then
                 DisplayRadar(false)
@@ -434,7 +453,7 @@ CreateThread(function()
                 thirst = math.ceil(PlayerData.metadata.thirst),
                 hunger = math.ceil(PlayerData.metadata.hunger),
                 oxygen = stamina or 0,
-                voice = LocalPlayer.state.proximity.distance,
+                voice = LocalPlayer.state['proximity'].distance,
                 talking = getPlayerVoiceMethod(cache.playerId),
                 colors = currentColors,
                 hudType = hudType,  -- Include HUD type
